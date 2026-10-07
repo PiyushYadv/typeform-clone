@@ -1,0 +1,334 @@
+@import "tailwindcss";
+
+/*
+ * Typeform respondent styles. Colors come from CSS variables set by
+ * themeStyle(), so a form's custom theme restyles everything at once.
+ * color-mix() gives Typeform's translucent tints of the answer color.
+ */
+
+:root {
+  --tf-bg: #ffffff;
+  --tf-question: #191919;
+  --tf-answer: #0445af;
+  --tf-button: #0445af;
+  --tf-button-text: #ffffff;
+  --tf-font: "Karla", "Helvetica Neue", Arial, sans-serif;
+  --tf-ease: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+
+/*
+ * Custom classes live in the components layer so Tailwind utilities
+ * (mt-8, w-20, justify-start...) can still override them.
+ */
+@layer components {
+  .tf-root {
+    background: var(--tf-bg);
+    color: var(--tf-question);
+    font-family: var(--tf-font);
+  }
+
+  /* ---------- Question header ---------- */
+
+  .tf-question-title {
+    font-size: 24px;
+    line-height: 32px;
+    font-weight: 400;
+    color: var(--tf-question);
+  }
+  .tf-question-desc {
+    margin-top: 8px;
+    font-size: 20px;
+    line-height: 28px;
+    color: color-mix(in srgb, var(--tf-question) 70%, transparent);
+  }
+  .tf-number {
+    color: var(--tf-answer);
+    font-size: 16px;
+    line-height: 32px;
+  }
+
+  /* ---------- Text inputs ---------- */
+
+  .tf-input {
+    width: 100%;
+    padding: 0 0 8px;
+    border: 0;
+    background: transparent;
+    color: var(--tf-answer);
+    font: inherit;
+    font-size: 30px;
+    line-height: 38px;
+    box-shadow: color-mix(in srgb, var(--tf-answer) 30%, transparent) 0 1px;
+    outline: none;
+    resize: none;
+    transition: box-shadow 0.1s ease-out;
+  }
+  .tf-input::placeholder {
+    color: color-mix(in srgb, var(--tf-answer) 30%, transparent);
+  }
+  .tf-input:focus {
+    box-shadow: var(--tf-answer) 0 2px;
+  }
+  @media (max-width: 640px) {
+    .tf-input { font-size: 24px; line-height: 32px; }
+    .tf-question-title { font-size: 20px; line-height: 28px; }
+    .tf-question-desc { font-size: 16px; line-height: 24px; }
+  }
+
+  /* ---------- Buttons ---------- */
+
+  .tf-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border: 0;
+    border-radius: 4px;
+    background: var(--tf-button);
+    color: var(--tf-button-text);
+    font: inherit;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 28px;
+    cursor: pointer;
+    box-shadow: rgba(0, 0, 0, 0.1) 0 3px 12px 0;
+    transition: filter 0.15s;
+  }
+  .tf-button:disabled { opacity: 0.6; cursor: default; filter: none; }
+  .tf-button:focus-visible,
+  .tf-choice:focus-visible,
+  .tf-nav button:focus-visible {
+    outline: 2px solid var(--tf-answer);
+    outline-offset: 2px;
+  }
+
+  .tf-enter-hint {
+    font-size: 12px;
+    color: color-mix(in srgb, var(--tf-question) 70%, transparent);
+  }
+  /* No keyboard on touch devices, so the hint would be misleading. */
+  @media (hover: none) {
+    .tf-enter-hint { display: none; }
+  }
+
+  /* ---------- Choices (multiple choice, yes/no) ---------- */
+
+  .tf-choice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 40px;
+    padding: 4px 8px 4px 4px;
+    border: 1px solid color-mix(in srgb, var(--tf-answer) 60%, transparent);
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--tf-answer) 10%, transparent);
+    color: var(--tf-answer);
+    font: inherit;
+    font-size: 20px;
+    line-height: 28px;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.1s ease-out;
+  }
+  .tf-choice[data-selected="true"] {
+    border-color: var(--tf-answer);
+    box-shadow: var(--tf-answer) 0 0 0 1px inset;
+    background: color-mix(in srgb, var(--tf-answer) 30%, transparent);
+  }
+  .tf-choice[data-blink="true"] {
+    animation: tf-blink 0.5s steps(1) 1;
+  }
+
+  .tf-key {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: 1px solid color-mix(in srgb, var(--tf-answer) 60%, transparent);
+    border-radius: 2px;
+    background: var(--tf-bg);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .tf-choice[data-selected="true"] .tf-key {
+    border-color: var(--tf-answer);
+    background: var(--tf-answer);
+    color: var(--tf-bg);
+  }
+
+  /* Typeform blinks the chosen option before moving on. */
+  @keyframes tf-blink {
+    0%, 50%, 100% { background: color-mix(in srgb, var(--tf-answer) 30%, transparent); }
+    25%, 75% { background: color-mix(in srgb, var(--tf-answer) 10%, transparent); }
+  }
+
+  /* ---------- Dropdown ---------- */
+
+  .tf-dropdown-list {
+    max-height: 240px;
+    overflow-y: auto;
+    margin-top: 8px;
+  }
+  .tf-dropdown-item {
+    display: block;
+    width: 100%;
+    margin-bottom: 8px;
+    padding: 6px 10px;
+    border: 1px solid color-mix(in srgb, var(--tf-answer) 60%, transparent);
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--tf-answer) 10%, transparent);
+    color: var(--tf-answer);
+    font: inherit;
+    font-size: 20px;
+    text-align: left;
+    cursor: pointer;
+  }
+  .tf-dropdown-item[data-active="true"] {
+    background: color-mix(in srgb, var(--tf-answer) 30%, transparent);
+  }
+
+  /* ---------- Rating ---------- */
+
+  .tf-rating-star {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 4px;
+    border: 0;
+    background: transparent;
+    color: var(--tf-answer);
+    font: inherit;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .tf-rating-star:focus-visible { outline: 2px solid var(--tf-answer); border-radius: 4px; }
+
+  /* ---------- Error ---------- */
+
+  .tf-error {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 3px;
+    background: #f7e6e6;
+    color: #af0404;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  /* ---------- Progress & navigation ---------- */
+
+  .tf-progress-track {
+    height: 4px;
+    background: color-mix(in srgb, var(--tf-answer) 30%, transparent);
+  }
+  .tf-progress-fill {
+    height: 100%;
+    background: var(--tf-answer);
+    transition: width 0.4s var(--tf-ease);
+  }
+
+  .tf-nav {
+    display: flex;
+    overflow: hidden;
+    border-radius: 4px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0 3px 12px 0;
+  }
+  .tf-nav button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 32px;
+    border: 0;
+    background: var(--tf-button);
+    color: var(--tf-button-text);
+    cursor: pointer;
+  }
+  .tf-nav button + button {
+    border-left: 1px solid color-mix(in srgb, var(--tf-button-text) 30%, transparent);
+  }
+  .tf-nav button:disabled { opacity: 0.5; cursor: default; }
+
+  /*
+   * Hover only on devices with a real pointer. On touch screens a tap leaves a
+   * "sticky" hover behind, which made an untouched option look preselected.
+   */
+  @media (hover: hover) {
+    .tf-button:hover:not(:disabled) { filter: brightness(0.9); }
+    .tf-choice:hover { background: color-mix(in srgb, var(--tf-answer) 30%, transparent); }
+    .tf-dropdown-item:hover { background: color-mix(in srgb, var(--tf-answer) 30%, transparent); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tf-choice[data-blink="true"] { animation: none; }
+    .tf-progress-fill { transition: none; }
+  }
+
+  /* ---------- Creator app chrome (workspace, builder, results) ---------- */
+
+  .app-ui {
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: #262627;
+    font-size: 14px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background-color 0.15s, opacity 0.15s;
+  }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+  .btn-primary { background: #262627; color: #fff; }
+  .btn-primary:hover:not(:disabled) { background: #000; }
+  .btn-secondary { background: #fff; color: #262627; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15); }
+  .btn-secondary:hover:not(:disabled) { background: #f5f5f5; }
+  .btn-danger { background: #c42525; color: #fff; }
+  .btn-danger:hover:not(:disabled) { background: #a51d1d; }
+  .btn-ghost { color: #262627; }
+  .btn-ghost:hover:not(:disabled) { background: rgba(0, 0, 0, 0.05); }
+  .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+  }
+  .icon-btn:hover { background: rgba(0, 0, 0, 0.06); }
+
+  .app-input {
+    width: 100%;
+    height: 36px;
+    padding: 0 10px;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+    font-size: 14px;
+    outline: none;
+  }
+  .app-input:focus { box-shadow: inset 0 0 0 2px #262627; }
+
+  /* App focus ring, kept out of form screens (canvas, preview), which use Typeform's own. */
+  .app-ui :focus-visible:not(.tf-root, .tf-root *) { outline: 2px solid #262627; outline-offset: 2px; }
+}
